@@ -1,0 +1,196 @@
+<html>
+	<head>
+		<title>BBQ With Friends Test</title>
+		<style>
+			body {
+				text-align: center;
+				color: white;
+				background-color: black;
+			}
+			div {
+				padding: 20px;
+			}
+			#header {
+				padding-bottom: 0px;
+			}
+			#slashScreen {
+				margin: 0 auto;
+			}
+			#myPhotos {
+				display: none;
+			}
+			#friendsPhotos {
+				display: none;
+			}
+			#scoreBoard {
+				display: none;
+			}
+			#ignoreTheEdgeTest {
+				display: none;
+				position: absolute;
+				top: 0px;
+				left:0px;
+				padding: 0px;
+			}
+			#bigIsBadTest {
+				display: none;
+			}
+			#smallIsGoodTest {
+				display: none;
+			}
+			#moveALotTest {
+				display: none;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="header">
+			<h1>BBQ With Friends</h1>
+		</div>
+		<div id="splashScreen" class="contentHolder">
+			<img src="https://b37491ce1daabfd4793eb422ff9c50d6a4dab9e5-www.googledrive.com/host/0B8Xuq5ZfTn-8NFN3S2FkaE5Cd1k/bbq1.jpg">
+		</div>
+
+		<div id="myPhotos" class="contentHolder">
+			<h2>My Photos</h2>
+			<img src="me1.jpg" width="300">
+			<img src="me2.jpg" width="300">
+			<img src="me3.jpg" width="300">
+		</div>
+
+		<div id="friendsPhotos" class="contentHolder">
+			<h2>Friends Photos</h2>
+			<img src="friends1.jpg" width="300">
+			<img src="friends2.jpg" width="300">
+			<img src="friends3.jpg" width="300">
+		</div>
+
+		<div id="scoreBoard" class="contentHolder">
+			<h2>Scoreboard</h2>
+			<canvas id="myChart" width="800" height="400"></canvas>
+		</div>
+
+		<div id="bigIsBadTest" class="contentHolder">
+			<img src="big2.jpg" id="bigIsBadImageHolder">
+		</div>
+
+		<div id="smallIsGoodTest" class="contentHolder">
+			<img src="small2.jpg" id="smallIsGoodImageHolder"
+		</div>
+
+		<div id="moveALotTest" class="contentHolder">
+			Lets move!
+			<div id="box1" style="background-color: green; width: 10px; height: 10px;">&nbsp;</div>
+			<div id="box2" style="background-color: red; width: 10px; height: 10px;">&nbsp;</div>
+			<div id="box3" style="background-color: blue; width: 10px; height: 10px;">&nbsp;</div>
+		</div>
+
+		<div id="ignoreTheEdgeTest" class="contentHolder">
+			I am really important information.  Why did you put me here?
+		</div>
+
+
+		<script type="text/javascript" src="//code.jquery.com/jquery-2.1.1.min.js"></script>
+		<script type="text/javascript" src="//www.gstatic.com/cast/sdk/libs/receiver/2.0.0/cast_receiver.js"></script>
+		<script type="text/javascript" src="Chart.min.js"></script>
+
+		<script type="text/javascript">
+			$( document ).ready(function() {
+				var data = {
+				    labels: ["Nathan", "Matt", "Ciwrl", "Bianca", "Andy", "Ethan", "Renauld"],
+				    datasets: [
+				        {
+				            label: "First Picture",
+				            fillColor: "rgba(220,220,220,0.5)",
+				            strokeColor: "rgba(220,220,220,0.8)",
+				            highlightFill: "rgba(220,220,220,0.75)",
+				            highlightStroke: "rgba(220,220,220,1)",
+				            data: [65, 59, 80, 81, 56, 55, 40]
+				        },
+				        {
+				            label: "Best Picture",
+				            fillColor: "rgba(151,187,205,0.5)",
+				            strokeColor: "rgba(151,187,205,0.8)",
+				            highlightFill: "rgba(151,187,205,0.75)",
+				            highlightStroke: "rgba(151,187,205,1)",
+				            data: [28, 48, 40, 19, 86, 27, 90]
+				        }
+				    ]
+				};
+				var ctx = $("#myChart").get(0).getContext("2d");
+				var myBarChart = new Chart(ctx).Bar(data);
+			});
+
+			// utility function to display the text message in the input field
+			function displayDiv(div, sender_data) {
+				$(".contentHolder").hide();
+				$("#" + div).show();
+
+				if(div === "bigIsBadTest") {
+					$("#bigIsBadImageHolder").fadeOut().fadeIn().fadeOut().fadeIn().fadeOut();
+				}
+				if(div === "smallIsGoodTest") {
+					$("#smallIsGoodImageHolder").fadeOut(1000).fadeIn(1000).fadeOut(1000).fadeIn(1000).fadeOut(1000);
+				}
+
+				window.castReceiverManager.setApplicationState(div);
+			};
+
+			window.onload = function() {
+				cast.receiver.logger.setLevelValue(cast.receiver.LoggerLevel.ERROR);
+				window.castReceiverManager = cast.receiver.CastReceiverManager.getInstance();
+				//console.log('Starting Receiver Manager');
+
+				// handler for the 'ready' event
+				castReceiverManager.onReady = function(event) {
+					//console.log('Received Ready event: ' + JSON.stringify(event.data));
+					window.castReceiverManager.setApplicationState("Application status is ready...");
+				};
+
+				// handler for 'senderconnected' event
+				castReceiverManager.onSenderConnected = function(event) {
+					console.log('Received Sender Connected event: ' + event.data);
+					console.log(window.castReceiverManager.getSender(event.data).userAgent);
+					
+					var senders = window.castReceiverManager.getSenders();
+					console.log('sessionCount connect: ' + senders.length);
+				};
+
+				// handler for 'senderdisconnected' event
+				castReceiverManager.onSenderDisconnected = function(event) {
+					var senders = window.castReceiverManager.getSenders();
+					console.log('sessionCount disconnect: ' + senders.length);
+					console.log('Received Sender Disconnected event: ' + event.data);
+
+					if(senders.length == 0 && event.reason == cast.receiver.system.DisconnectReason.REQUESTED_BY_SENDER) {
+					window.close();
+					}
+				};
+
+				// handler for 'systemvolumechanged' event
+				castReceiverManager.onSystemVolumeChanged = function(event) {
+					console.log('Received System Volume Changed event: ' + event.data['level'] + ' ' + event.data['muted']);
+				};
+
+				// create a CastMessageBus to handle messages for a custom namespace
+				window.messageBus = window.castReceiverManager.getCastMessageBus('urn:x-cast:bbqwithfriends.unstableapps.com.bbqwithfriends');
+
+				// handler for the CastMessageBus message event
+				window.messageBus.onMessage = function(event) {
+					console.log('Message [' + event.senderId + ']: ' + event.data);
+					// display the message from the sender
+					displayDiv(event.data, event.senderId);
+					// inform all senders on the CastMessageBus of the incoming message event
+					// sender message listener will be invoked
+					window.messageBus.send(event.senderId, event.data);
+				}
+
+				// initialize the CastReceiverManager with an application status message
+				window.castReceiverManager.start({statusText: "Application is starting"});
+				console.log('Receiver Manager started');
+			};
+	</script>
+
+	</body>
+</html>
